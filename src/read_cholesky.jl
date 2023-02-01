@@ -1,8 +1,7 @@
 function read_f64(fname)
     x = open(fname, "r") do f
-        x = Vector{Float64}(undef, stat(f).size ÷ sizeof(Float64));
-        read!(f, x);
-        x
+        x = Vector{Float64}(undef, stat(f).size ÷ sizeof(Float64))
+        read!(f, x)
     end
     return x
 end
