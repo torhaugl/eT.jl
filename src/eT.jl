@@ -30,14 +30,14 @@ function run_ccsd(mol::Vector{Atom}, bset::String; kwargs...)
     input_file = input_ccsd(mol, bset; kwargs...)
 
     E = mktempdir() do scratch
-    	fname = joinpath(scratch, "ccsd.inp")
-    	ofname = joinpath(scratch, "ccsd.out")
+        fname = joinpath(scratch, "ccsd.inp")
+        ofname = joinpath(scratch, "ccsd.out")
         open(fname, "w") do file
             write(file, input_file)
         end
         run_input(fname, ofname, omp)
 
-	    # Read CCSD energy
+        # Read CCSD energy
         parse(Float64, split(read(`grep 'Final ground' $ofname`, String), ':')[2][1:end-2])
     end # delete scratch
 
@@ -50,14 +50,14 @@ function run_cholesky(mol::Vector{Atom}, bset::String; kwargs...)
     input_file = input_ccsd(mol, bset; ccsd_threshold=1e8, cholesky_storage="disk", kwargs...)
 
     L_pqJ, norb = mktempdir() do scratch
-    	fname = joinpath(scratch, "ccsd.inp")
-    	ofname = joinpath(scratch, "ccsd.out")
+        fname = joinpath(scratch, "ccsd.inp")
+        ofname = joinpath(scratch, "ccsd.out")
         open(fname, "w") do file
             write(file, input_file)
         end
         run_input(fname, ofname, omp)
 
-	    read_cholesky(scratch)
+        read_cholesky(scratch)
     end # delete scratch
 
     return L_pqJ, norb
