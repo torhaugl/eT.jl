@@ -5,6 +5,7 @@ using GaussianBasis
 
 export run_ccsd, run_cholesky
 
+include("input.jl")
 include("inputs.jl")
 include("read_cholesky.jl")
 
