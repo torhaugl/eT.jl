@@ -10,11 +10,15 @@ include("read_cholesky.jl")
 
 function run_input(fname, ofname, omp)
     scratch = joinpath(Base.Filesystem.splitpath(fname)[begin:end-1])
+    eT_exe = joinpath(ENV["HOME"], "opt/eT/build/eT_launch.py")
+    if !isfile(eT_exe)
+        error("Did not find eT executable at $eT_exe")
+    end
     try
-        run(`python3 /home/torhaugl/opt/eT/build/eT_launch.py -nt -ks --scratch $scratch --omp $omp $fname -of $ofname`)
+        run(`python3 $eT_exe -nt -ks --scratch $scratch --omp $omp $fname -of $ofname`)
     catch e
-        display(e)
         println(read(`cat $ofname`, String))
+        display(e)
     end
 end
 
