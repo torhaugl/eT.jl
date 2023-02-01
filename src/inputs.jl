@@ -1,6 +1,7 @@
 function input_ccsd(mol, bset; kwargs...)
+    xyz = chomp(string(Molecules.get_xyz(mol)))
     mem = get(kwargs, :memory, 8)
-    cholesky_storage = haskey(kwargs, :cholesky_storage) ? "cholesky storage: " * kwargs[:cholesky_storage] : ""
+    cholesky_storage = haskey(kwargs, :cholesky_storage) ? "\ncholesky storage: " * kwargs[:cholesky_storage] : ""
     max_ccsd_iterations = get(kwargs, :max_ccsd_iterations, 100)
     ccsd_threshold = get(kwargs, :ccsd_threshold, 1e-10)
 """system
@@ -23,8 +24,7 @@ solver cholesky
     threshold: 1.0d-12
 end solver cholesky
 
-integrals
-    $(cholesky_storage)
+integrals $(cholesky_storage)
 end integrals
 
 solver scf
@@ -39,6 +39,7 @@ solver cc gs
 end solver cc gs
 
 geometry
-basis: $(bset.name)
-$(Molecules.get_xyz(mol))end geometry"""
+basis: $bset
+$xyz
+end geometry"""
 end

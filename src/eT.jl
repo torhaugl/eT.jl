@@ -18,7 +18,7 @@ function run_input(fname, ofname, omp)
     end
 end
 
-function run_ccsd(mol::Vector{Atom}, bset::BasisSet; kwargs...)
+function run_ccsd(mol::Vector{Atom}, bset::String; kwargs...)
     omp = get(kwargs, :omp, 1)
 
     input_file = input_ccsd(mol, bset; kwargs...)
@@ -39,7 +39,7 @@ function run_ccsd(mol::Vector{Atom}, bset::BasisSet; kwargs...)
     return E
 end
 
-function run_cholesky(mol::Vector{Atom}, bset::BasisSet; kwargs...)
+function run_cholesky(mol::Vector{Atom}, bset::String; kwargs...)
     omp = get(kwargs, :omp, 1)
 
     input_file = input_ccsd(mol, bset; ccsd_threshold=1e8, cholesky_storage="disk", kwargs...)
