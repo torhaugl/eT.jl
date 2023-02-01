@@ -1,6 +1,7 @@
 function input_ccsd(mol, bset; kwargs...)
-    mem = get(kwargs, :memory, 8)
-    cholesky_storage = haskey(kwargs, :cholesky_storage) ? "cholesky storage: " * kwargs[:cholesky_storage] : ""
+    xyz = chomp(string(Molecules.get_xyz(mol)))
+    memory = get(kwargs, :memory, 8)
+    cholesky_storage = haskey(kwargs, :cholesky_storage) ? "\ncholesky storage: " * kwargs[:cholesky_storage] : ""
     max_ccsd_iterations = get(kwargs, :max_ccsd_iterations, 100)
     ccsd_threshold = get(kwargs, :ccsd_threshold, 1e-10)
 """system
@@ -11,8 +12,12 @@ do
 end do
 
 memory
-    available: $mem
+    available: $memory
 end memory
+
+print
+    output print level: normal
+end print
 
 method
     hf
@@ -23,8 +28,7 @@ solver cholesky
     threshold: 1.0d-12
 end solver cholesky
 
-integrals
-    $(cholesky_storage)
+integrals $(cholesky_storage)
 end integrals
 
 solver scf
@@ -39,6 +43,44 @@ solver cc gs
 end solver cc gs
 
 geometry
-basis: $(bset.name)
-$(Molecules.get_xyz(mol))end geometry"""
+basis: $bset
+$xyz
+end geometry"""
+end
+
+function input_hf(mol, bset; kwargs...)
+    xyz = chomp(string(Molecules.get_xyz(mol)))
+    memory = get(kwargs, :memory, 8)
+    max_hf_iterations = get(kwargs, :max_ccsd_iterations, 100)
+    hf_threshold = get(kwargs, :ccsd_threshold, 1e-10)
+"""system
+end system
+
+do
+    ground state
+end do
+
+memory
+    available: $memory
+end memory
+
+print
+    output print level: normal
+end print
+
+method
+    hf
+end method
+
+solver scf
+    energy threshold: $hf_threshold
+    gradient threshold: $hf_threshold
+    max iterations: $max_hf_iterations
+    diis dimension: 8
+end solver scf
+
+geometry
+basis: $bset
+$xyz
+end geometry"""
 end

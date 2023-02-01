@@ -4,7 +4,6 @@ authors = ["Tor S. Haugland", "Marcus T. Lexander"]
 version = "0.1.0"
 
 [deps]
-GaussianBasis = "9bb1a3dc-0d1c-467e-84f5-0c4ef701360a"
 Molecules = "5de6a177-b489-40a9-b2f4-524242b9b679"
 
 [compat]
