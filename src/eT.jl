@@ -1,7 +1,6 @@
 module eT
 
 using Molecules
-using GaussianBasis
 
 export run_ccsd, run_cholesky, run_hf
 
