@@ -9,11 +9,13 @@ include("inputs.jl")
 include("read_cholesky.jl")
 
 function run_input(fname, ofname, omp)
-    scratch = joinpath(Base.Filesystem.splitpath(fname)[begin:end-1])
+    scratch = joinpath(splitpath(fname)[begin:end-1])
     eT_exe = joinpath(ENV["HOME"], "opt/eT/build/eT_launch.py")
+
     if !isfile(eT_exe)
         error("Did not find eT executable at $eT_exe")
     end
+
     try
         run(`python3 $eT_exe -nt -ks --scratch $scratch --omp $omp $fname -of $ofname`)
     catch e
@@ -28,7 +30,7 @@ function run_ccsd(mol::Vector{Atom}, bset::String; kwargs...)
     input_file = input_ccsd(mol, bset; kwargs...)
 
     E = nothing
-    Base.Filesystem.mktempdir() do scratch
+    mktempdir() do scratch
     	fname = joinpath(scratch, "ccsd.inp")
     	ofname = joinpath(scratch, "ccsd.out")
         open(fname, "w") do file
@@ -36,7 +38,7 @@ function run_ccsd(mol::Vector{Atom}, bset::String; kwargs...)
         end
         run_input(fname, ofname, omp)
 
-	# Read CCSD energy
+	    # Read CCSD energy
     	E = parse(Float64, split(read(`grep 'Final ground' $ofname`, String), ':')[2][1:end-2])
     end # delete scratch
 
@@ -50,15 +52,14 @@ function run_cholesky(mol::Vector{Atom}, bset::String; kwargs...)
 
     L_pqJ = nothing
     norb = nothing
-    Base.Filesystem.mktempdir() do scratch
+    mktempdir() do scratch
     	fname = joinpath(scratch, "ccsd.inp")
     	ofname = joinpath(scratch, "ccsd.out")
         open(fname, "w") do file
             write(file, input_file)
         end
         run_input(fname, ofname, omp)
-
-	L_pqJ, norb = read_cholesky(scratch)
+	    L_pqJ, norb = read_cholesky(scratch)
     end # delete scratch
 
     return L_pqJ, norb
