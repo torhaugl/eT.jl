@@ -8,6 +8,13 @@ include("input.jl")
 include("inputs.jl")
 include("read_cholesky.jl")
 
+eT_launch = "eT_launch.py"
+
+function set_eT_path(new_path)
+    global eT_launch
+    eT_launch = new_path
+end
+
 function run_input(fname, ofname, omp)
     scratch = joinpath(splitpath(fname)[begin:end-1])
     eT_exe = joinpath(ENV["HOME"], "opt/eT/build/eT_launch.py")
