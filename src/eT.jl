@@ -2,7 +2,7 @@ module eT
 
 using Molecules
 
-export run_ccsd, run_cholesky, run_hf
+export run_ccsd, run_cholesky, run_hf, run_ccsd_polarizability
 
 include("input.jl")
 include("inputs.jl")
@@ -96,6 +96,33 @@ function run_cholesky(mol::Vector{Atom}, bset::String; kwargs...)
     end # delete scratch
 
     return L_pqJ, norb
+end
+
+function run_ccsd_polarizability(mol::Vector{Atom}, bset::String, frequency; kwargs...)
+    omp = get(kwargs, :omp, 1)
+
+    input_file = input_ccsd_polarizability(mol, bset, frequency; kwargs...)
+
+    polarizability_vec = mktempdir() do scratch
+        fname = joinpath(scratch, "ccsd.inp")
+        ofname = joinpath(scratch, "ccsd.out")
+        open(fname, "w") do file
+            write(file, input_file)
+        end
+        run_input(fname, ofname, omp)
+
+        # Read polarizability
+        -parse.(Float64, split(read(pipeline(`grep '<< ' $ofname`, `cut -d: -f2`), String), '\n')[begin:end-1])
+    end # delete scratch
+
+    n = 0
+    polarizability_matrix = zeros(Float64, (3,3,length(frequency)))
+    for freq = 1:length(frequency), i = 1:3, j=1:i
+        n += 1
+        polarizability_matrix[i,j,freq] = polarizability_matrix[j,i,freq] = polarizability_vec[n]
+    end
+
+    return polarizability_matrix
 end
 
 end

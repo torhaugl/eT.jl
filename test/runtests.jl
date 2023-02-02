@@ -1,7 +1,6 @@
-using eT
 using Test
+using eT
 using Molecules
-using GaussianBasis
 
 function test_hf_energy()
     mol = Molecules.parse_string("""
