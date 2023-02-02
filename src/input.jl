@@ -56,7 +56,6 @@ function make_input_hf(molecule, basis, args...)
     inp = InputFile(molecule, basis)
 
     inp.sections["do"] = ["ground state"]
-    # inp.sections["memory"] = ["available" => 8]
     inp.sections["method"] = ["hf"]
 
     add_fields!(inp, args...)
