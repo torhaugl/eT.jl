@@ -4,6 +4,7 @@ using Molecules
 
 export run_ccsd, run_cholesky, run_hf, run_ccsd_polarizability
 
+include("input.jl")
 include("inputs.jl")
 include("read_cholesky.jl")
 
