@@ -5,8 +5,19 @@ using Molecules
 export run_ccsd, run_cholesky, run_hf, run_ccsd_polarizability
 
 include("input.jl")
+include("run_input.jl")
+
+include("output.jl")
+
 include("inputs.jl")
 include("read_cholesky.jl")
+
+eT_launch = "eT_launch.py"
+
+function set_eT_path(new_path)
+    global eT_launch
+    eT_launch = new_path
+end
 
 function run_input(fname, ofname, omp)
     scratch = joinpath(splitpath(fname)[begin:end-1])
