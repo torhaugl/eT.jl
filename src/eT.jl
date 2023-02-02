@@ -111,7 +111,7 @@ function run_ccsd_polarizability(mol::Vector{Atom}, bset::String, frequency; kwa
         run_input(fname, ofname, omp)
 
         # Read polarizability
-        parse.(Float64, split(read(pipeline(`grep '<< ' $ofname`, `cut -d: -f2`), String), '\n')[begin:end-1])
+        -parse.(Float64, split(read(pipeline(`grep '<< ' $ofname`, `cut -d: -f2`), String), '\n')[begin:end-1])
     end # delete scratch
 
     n = 0
