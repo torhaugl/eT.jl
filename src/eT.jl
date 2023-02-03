@@ -14,6 +14,14 @@ include("read_cholesky.jl")
 
 eT_launch = "eT_launch.py"
 
+eT_path_file = abspath(first(DEPOT_PATH), "eT")
+
+if isfile(eT_path_file)
+    eT_launch = read(eT_path_file, String)
+else
+    throw("eT.jl not setup properly! Running `]build eT` might fix the issue.")
+end
+
 function set_eT_path(new_path)
     global eT_launch
     eT_launch = new_path
