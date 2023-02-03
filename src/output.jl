@@ -11,6 +11,10 @@ struct OutputFile
 
             if ext == ".out"
                 contents[name] = read(joinpath(directory, entry), String)
+            elseif ext == ".molden"
+                contents["eT.molden"] = read(
+                    joinpath(directory, "eT.molden"), String
+                )
             end
         end
 
@@ -94,4 +98,9 @@ function get_molecular_gradient(out::OutputFile)
     end
 
     reshape(g, 3, length(g) ÷ 3)
+end
+
+export write_molden
+function write_molden(io::IO, out::OutputFile)
+    write(io, out.contents["eT.molden"])
 end
