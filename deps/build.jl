@@ -44,8 +44,6 @@ else
         run(`$dep --version`)
     end
 
-    @warn "Assuming installation of MKL is in environment"
-
     ninja_exe = "$(pwd())/ninja-build/ninja"
 
     @info "Installing ninja"
@@ -99,18 +97,32 @@ archive/refs/tags/v$libcint_version.tar.gz",
         cd("../..")
     end
 
+    mkl_root = "$eT_dir/mkl_apt/"
+    @info "Installing mkl"
+    mkl_task = @async begin
+        download(
+            "https://folk.ntnu.no/marcustl/mkl/mkl_apt.tar.xz",
+            "mkl_apt.tar.xz"
+        )
+    end
+
     @info "Building eT"
     begin
-        run(`git clone https://gitlab.com/eT-program/eT --recursive`)
+        eT_clone_task = run(
+            `git clone https://gitlab.com/eT-program/eT --recursive`,
+            wait=false
+        )
 
-        cd("eT")
-
-        run(`git checkout development`)
+        wait(mkl_task)
+        run(`tar xf mkl_apt.tar.xz`)
 
         wait(libcint_task)
 
+        wait(eT_clone_task)
+        cd("eT")
+        run(`git checkout development`)
         run(`bash $orig_dir/envoke-setup.sh \
-$libcint_install $cmake_exe $ninja_exe`)
+$libcint_install $cmake_exe $ninja_exe $mkl_root`)
 
         cd("build")
 
