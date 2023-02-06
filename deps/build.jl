@@ -34,7 +34,7 @@ else
     cd(eT_dir)
 
     dependencies = [
-        "gcc", "gfortran", "git", "wget", "tar"
+        "gcc", "gfortran", "git", "tar"
     ]
 
     @warn "Assuming the following dependencies: $dependencies"
@@ -53,8 +53,11 @@ else
         mkdir("ninja-build")
         cd("ninja-build")
 
-        run(`wget \
-https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-linux.zip`)
+        download(
+            "https://github.com/ninja-build/ninja/releases\
+/download/v1.11.1/ninja-linux.zip",
+            "ninja-linux.zip"
+        )
 
         run(`unzip ninja-linux.zip`)
 
@@ -64,24 +67,32 @@ https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-linux.zip`)
     cmake_exe = "$(pwd())/cmake-3.25.2-linux-x86_64/bin/"
     @info "Installing cmake"
     begin
-        run(`wget \
-https://github.com/Kitware/CMake/releases/download/v3.25.2/\
-cmake-3.25.2-linux-x86_64.tar.gz`)
+        download(
+            "https://github.com/Kitware/CMake/releases/download/v3.25.2/\
+cmake-3.25.2-linux-x86_64.tar.gz",
+            "cmake.tar.gz"
+        )
 
-        run(`tar xzf cmake-3.25.2-linux-x86_64.tar.gz`)
+        run(`tar xzf cmake.tar.gz`)
     end
 
+    libcint_version = "5.1.9"
+    libcint_install = "$eT_dir/libcint-$libcint_version/install/"
     @info "Installing libcint"
     libcint_task = @async begin
-        run(`git clone --depth 1 --branch v5.1.9 \
-https://github.com/sunqm/libcint`)
-        cd("libcint")
+        download(
+            "https://github.com/sunqm/libcint/\
+archive/refs/tags/v$libcint_version.tar.gz",
+            "libcint.tar.gz"
+        )
+        run(`tar xzf libcint.tar.gz`)
+        cd("libcint-$libcint_version")
 
         mkdir("build")
         cd("build")
 
         run(`$cmake_exe/cmake .. -DBUILD_SHARED_LIBS=0 -DPYPZPX=1 \
--DCMAKE_INSTALL_PREFIX=../install/ -GNinja \
+-DCMAKE_INSTALL_PREFIX=$libcint_install -GNinja \
 -DCMAKE_MAKE_PROGRAM=$ninja_exe`)
 
         run(`$cmake_exe/cmake --build . --target install`)
@@ -98,7 +109,8 @@ https://github.com/sunqm/libcint`)
 
         wait(libcint_task)
 
-        run(`bash $orig_dir/envoke-setup.sh $eT_dir $cmake_exe $ninja_exe`)
+        run(`bash $orig_dir/envoke-setup.sh \
+$libcint_install $cmake_exe $ninja_exe`)
 
         cd("build")
 
