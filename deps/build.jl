@@ -34,7 +34,7 @@ else
     cd(eT_dir)
 
     dependencies = [
-        "cmake", "gcc", "gfortran", "git", "wget"
+        "gcc", "gfortran", "git", "wget", "tar"
     ]
 
     @warn "Assuming the following dependencies: $dependencies"
@@ -46,6 +46,8 @@ else
 
     @warn "Assuming installation of MKL is in environment"
 
+    ninja_exe = "$(pwd())/ninja-build/ninja"
+
     @info "Installing ninja"
     begin
         mkdir("ninja-build")
@@ -56,13 +58,21 @@ https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-linux.zip`)
 
         run(`unzip ninja-linux.zip`)
 
-        ninja_exe = "$(pwd())/ninja"
-
         cd("..")
     end
 
-    @info "Installing libcint"
+    cmake_exe = "$(pwd())/cmake-3.25.2-linux-x86_64/bin/"
+    @info "Installing cmake"
     begin
+        run(`wget \
+https://github.com/Kitware/CMake/releases/download/v3.25.2/\
+cmake-3.25.2-linux-x86_64.tar.gz`)
+
+        run(`tar xzf cmake-3.25.2-linux-x86_64.tar.gz`)
+    end
+
+    @info "Installing libcint"
+    libcint_task = @async begin
         run(`git clone --depth 1 --branch v5.1.9 \
 https://github.com/sunqm/libcint`)
         cd("libcint")
@@ -70,11 +80,11 @@ https://github.com/sunqm/libcint`)
         mkdir("build")
         cd("build")
 
-        run(`cmake .. -DBUILD_SHARED_LIBS=0 -DPYPZPX=1 \
+        run(`$cmake_exe/cmake .. -DBUILD_SHARED_LIBS=0 -DPYPZPX=1 \
 -DCMAKE_INSTALL_PREFIX=../install/ -GNinja \
 -DCMAKE_MAKE_PROGRAM=$ninja_exe`)
 
-        run(`cmake --build . --target install`)
+        run(`$cmake_exe/cmake --build . --target install`)
         cd("../..")
     end
 
@@ -86,12 +96,13 @@ https://github.com/sunqm/libcint`)
 
         run(`git checkout development`)
 
-        run(`./setup.py -clean -lc $eT_dir/libcint/install/ \
--cmake-flags="-DCMAKE_MAKE_PROGRAM=$ninja_exe"`)
+        wait(libcint_task)
+
+        run(`bash $orig_dir/envoke-setup.sh $eT_dir $cmake_exe $ninja_exe`)
 
         cd("build")
 
-        run(`ninja`)
+        run(`$ninja_exe`)
 
         eT_launch = "$(pwd())/eT_launch.py"
 
