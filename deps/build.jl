@@ -34,7 +34,7 @@ else
     cd(eT_dir)
 
     dependencies = [
-        "ninja", "cmake", "gcc", "gfortran", "git"
+        "cmake", "gcc", "gfortran", "git", "wget"
     ]
 
     @warn "Assuming the following dependencies: $dependencies"
@@ -46,8 +46,22 @@ else
 
     @warn "Assuming installation of MKL is in environment"
 
-    @info "Installing libcint"
+    @info "Installing ninja"
+    begin
+        mkdir("ninja-build")
+        cd("ninja-build")
 
+        run(`wget \
+https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-linux.zip`)
+
+        run(`unzip ninja-linux.zip`)
+
+        ninja_exe = "$(pwd())/ninja"
+
+        cd("..")
+    end
+
+    @info "Installing libcint"
     begin
         run(`git clone --depth 1 --branch v5.1.9 \
 https://github.com/sunqm/libcint`)
@@ -57,14 +71,14 @@ https://github.com/sunqm/libcint`)
         cd("build")
 
         run(`cmake .. -DBUILD_SHARED_LIBS=0 -DPYPZPX=1 \
--DCMAKE_INSTALL_PREFIX=../install/ -GNinja`)
+-DCMAKE_INSTALL_PREFIX=../install/ -GNinja \
+-DCMAKE_MAKE_PROGRAM=$ninja_exe`)
 
         run(`cmake --build . --target install`)
         cd("../..")
     end
 
     @info "Building eT"
-
     begin
         run(`git clone https://gitlab.com/eT-program/eT --recursive`)
 
@@ -72,13 +86,16 @@ https://github.com/sunqm/libcint`)
 
         run(`git checkout development`)
 
-        run(`./setup.py -clean -lc $eT_dir/libcint/install/`)
+        run(`./setup.py -clean -lc $eT_dir/libcint/install/ \
+-cmake-flags="-DCMAKE_MAKE_PROGRAM=$ninja_exe"`)
 
         cd("build")
 
         run(`ninja`)
 
         eT_launch = "$(pwd())/eT_launch.py"
+
+        cd("../..")
     end
 
     @info "eT_launch is now at $eT_launch"
