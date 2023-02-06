@@ -83,5 +83,9 @@ https://github.com/sunqm/libcint`)
 
     @info "eT_launch is now at $eT_launch"
 
+    open(joinpath(eT_dir, "eT_path.txt"), "w") do io
+        print(io, eT_launch)
+    end
+
     cd(orig_dir)
 end
