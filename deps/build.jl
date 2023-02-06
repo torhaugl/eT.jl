@@ -44,27 +44,20 @@ else
         run(`$dep --version`)
     end
 
-    ninja_exe = "$(pwd())/ninja-build/ninja"
+    ninja_exe = "$eT_dir/ninja"
 
-    @info "Installing ninja"
-    begin
-        mkdir("ninja-build")
-        cd("ninja-build")
-
+    ninja_task = @async begin
         download(
             "https://github.com/ninja-build/ninja/releases\
 /download/v1.11.1/ninja-linux.zip",
             "ninja-linux.zip"
         )
-
         run(`unzip ninja-linux.zip`)
-
-        cd("..")
     end
 
-    cmake_exe = "$(pwd())/cmake-3.25.2-linux-x86_64/bin/"
+    cmake_exe = "$eT_dir/cmake-3.25.2-linux-x86_64/bin/"
     @info "Installing cmake"
-    begin
+    cmake_task = @async begin
         download(
             "https://github.com/Kitware/CMake/releases/download/v3.25.2/\
 cmake-3.25.2-linux-x86_64.tar.gz",
@@ -84,17 +77,12 @@ archive/refs/tags/v$libcint_version.tar.gz",
             "libcint.tar.gz"
         )
         run(`tar xzf libcint.tar.gz`)
-        cd("libcint-$libcint_version")
 
-        mkdir("build")
-        cd("build")
+        wait($ninja_task)
+        wait($cmake_task)
 
-        run(`$cmake_exe/cmake .. -DBUILD_SHARED_LIBS=0 -DPYPZPX=1 \
--DCMAKE_INSTALL_PREFIX=$libcint_install -GNinja \
--DCMAKE_MAKE_PROGRAM=$ninja_exe`)
-
-        run(`$cmake_exe/cmake --build . --target install`)
-        cd("../..")
+        run(`bash $orig_dir/build-libcint.sh \
+libcint-$libcint_version $cmake_exe $ninja_exe`)
     end
 
     mkl_root = "$eT_dir/mkl_apt/"
@@ -104,33 +92,20 @@ archive/refs/tags/v$libcint_version.tar.gz",
             "https://folk.ntnu.no/marcustl/mkl/mkl_apt.tar.xz",
             "mkl_apt.tar.xz"
         )
+
+        run(`tar xf mkl_apt.tar.xz`)
     end
 
+    eT_launch = "$eT_dir/eT/build/eT_launch.py"
     @info "Building eT"
     begin
-        eT_clone_task = run(
-            `git clone https://gitlab.com/eT-program/eT --recursive`,
-            wait=false
-        )
+        run(`git clone https://gitlab.com/eT-program/eT --recursive`)
 
         wait(mkl_task)
-        run(`tar xf mkl_apt.tar.xz`)
-
         wait(libcint_task)
 
-        wait(eT_clone_task)
-        cd("eT")
-        run(`git checkout development`)
-        run(`bash $orig_dir/envoke-setup.sh \
+        run(`bash $orig_dir/build-eT.sh \
 $libcint_install $cmake_exe $ninja_exe $mkl_root`)
-
-        cd("build")
-
-        run(`$ninja_exe`)
-
-        eT_launch = "$(pwd())/eT_launch.py"
-
-        cd("../..")
     end
 
     @info "eT_launch is now at $eT_launch"
