@@ -1,5 +1,5 @@
-PATH=$2:$PATH
-MATH_ROOT=$4
+export PATH=$2:$PATH
+export MATH_ROOT=$4
 
 cd eT
 git checkout development
