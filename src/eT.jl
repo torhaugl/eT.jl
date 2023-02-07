@@ -1,6 +1,7 @@
 module eT
 
 using Molecules
+using Conda
 
 export run_ccsd, run_cholesky, run_hf, run_ccsd_polarizability
 
@@ -14,21 +15,35 @@ include("read_cholesky.jl")
 
 eT_launch = "eT_launch.py"
 
+eT_path_file = abspath(first(DEPOT_PATH), "eT/eT_path.txt")
+
+if isfile(eT_path_file)
+    eT_launch = read(eT_path_file, String)
+else
+    throw("eT.jl not setup properly! Running `]build eT` might fix the issue.")
+end
+
 function set_eT_path(new_path)
     global eT_launch
     eT_launch = new_path
 end
 
+function run_ctest(jobs)
+    build_dir = splitdir(abspath(eT_launch))[1]
+
+    old_dir = pwd()
+    cd(build_dir)
+
+    run(`$(Conda.BINDIR)/ctest -j$jobs`)
+
+    cd(old_dir)
+end
+
 function run_input(fname, ofname, omp)
     scratch = joinpath(splitpath(fname)[begin:end-1])
-    eT_exe = joinpath(ENV["HOME"], "opt/eT/build/eT_launch.py")
-
-    if !isfile(eT_exe)
-        error("Did not find eT executable at $eT_exe")
-    end
 
     try
-        run(`python3 $eT_exe -nt -ks --scratch $scratch --omp $omp $fname -of $ofname`)
+        run(`python3 $eT_launch -nt -ks --scratch $scratch --omp $omp $fname -of $ofname`)
     catch e
         println(read(`cat $ofname`, String))
         display(e)
