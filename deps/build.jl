@@ -35,31 +35,10 @@ else
     orig_dir = pwd()
     cd(eT_dir)
 
-    Conda.add(["git", "tar", "unzip", "gcc", "gxx", "gfortran"])
+    Conda.add(
+        ["git", "tar", "unzip", "gcc", "gxx", "gfortran", "cmake", "ninja"]
+    )
     pref = Conda.BINDIR
-
-    ninja_exe = "$eT_dir/ninja"
-
-    ninja_task = @async begin
-        download(
-            "https://github.com/ninja-build/ninja/releases\
-/download/v1.11.1/ninja-linux.zip",
-            "ninja-linux.zip"
-        )
-        run(`$pref/unzip ninja-linux.zip`)
-    end
-
-    cmake_exe = "$eT_dir/cmake-3.25.2-linux-x86_64/bin/"
-    @info "Installing cmake"
-    cmake_task = @async begin
-        download(
-            "https://github.com/Kitware/CMake/releases/download/v3.25.2/\
-cmake-3.25.2-linux-x86_64.tar.gz",
-            "cmake.tar.gz"
-        )
-
-        run(`$pref/tar xzf cmake.tar.gz`)
-    end
 
     libcint_version = "5.1.9"
     libcint_install = "$eT_dir/libcint-$libcint_version/install/"
@@ -72,11 +51,8 @@ archive/refs/tags/v$libcint_version.tar.gz",
         )
         run(`$pref/tar xzf libcint.tar.gz`)
 
-        wait($ninja_task)
-        wait($cmake_task)
-
         run(`bash $orig_dir/build-libcint.sh \
-libcint-$libcint_version $cmake_exe $ninja_exe $pref`)
+libcint-$libcint_version $pref`)
     end
 
     mkl_root = "$eT_dir/mkl_apt/"
@@ -99,7 +75,7 @@ libcint-$libcint_version $cmake_exe $ninja_exe $pref`)
         wait(libcint_task)
 
         run(`bash $orig_dir/build-eT.sh \
-$libcint_install $cmake_exe $ninja_exe $mkl_root $pref`)
+$libcint_install $mkl_root $pref`)
     end
 
     @info "eT_launch is now at $eT_launch"
