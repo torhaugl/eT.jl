@@ -1,6 +1,7 @@
 module eT
 
 using Molecules
+using Conda
 
 export run_ccsd, run_cholesky, run_hf, run_ccsd_polarizability
 
@@ -33,7 +34,7 @@ function run_ctest(jobs)
     old_dir = pwd()
     cd(build_dir)
 
-    run(`ctest -j$jobs`)
+    run(`$(Conda.BINDIR)/ctest -j$jobs`)
 
     cd(old_dir)
 end
