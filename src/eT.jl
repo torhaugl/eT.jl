@@ -40,14 +40,9 @@ end
 
 function run_input(fname, ofname, omp)
     scratch = joinpath(splitpath(fname)[begin:end-1])
-    eT_exe = joinpath(ENV["HOME"], "opt/eT/build/eT_launch.py")
-
-    if !isfile(eT_exe)
-        error("Did not find eT executable at $eT_exe")
-    end
 
     try
-        run(`python3 $eT_exe -nt -ks --scratch $scratch --omp $omp $fname -of $ofname`)
+        run(`python3 $eT_launch -nt -ks --scratch $scratch --omp $omp $fname -of $ofname`)
     catch e
         println(read(`cat $ofname`, String))
         display(e)
