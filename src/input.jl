@@ -52,7 +52,6 @@ function add_fields!(inp::InputFile, args...)
     end
 end
 
-export make_input_hf
 function make_input_hf(molecule, basis, args...)
     inp = InputFile(molecule, basis)
 
