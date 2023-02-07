@@ -14,7 +14,7 @@ include("read_cholesky.jl")
 
 eT_launch = "eT_launch.py"
 
-eT_path_file = abspath(first(DEPOT_PATH), "eT")
+eT_path_file = abspath(first(DEPOT_PATH), "eT/eT_path.txt")
 
 if isfile(eT_path_file)
     eT_launch = read(eT_path_file, String)
@@ -25,6 +25,17 @@ end
 function set_eT_path(new_path)
     global eT_launch
     eT_launch = new_path
+end
+
+function run_ctest(jobs)
+    build_dir = splitdir(abspath(eT_launch))[1]
+
+    old_dir = pwd()
+    cd(build_dir)
+
+    run(`ctest -j$jobs`)
+
+    cd(old_dir)
 end
 
 function run_input(fname, ofname, omp)
