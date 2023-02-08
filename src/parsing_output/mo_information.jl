@@ -3,6 +3,20 @@ function write_molden(io::IO, out::OutputFile)
     write(io, out.contents["eT.molden"])
 end
 
+function write_molden(filename, out::OutputFile; xyz=true)
+    open(filename, "w") do io
+        write_molden(io, out)
+    end
+
+    if xyz
+        mol = get_geometry(out)
+
+        open("$(splitext(filename)[1]).xyz", "w") do io
+            print(io, length(mol.atoms), "\n\n", Molecules.get_xyz(mol))
+        end
+    end
+end
+
 const mo_energy_regex1 = r"- Molecular orbital energies\s+-+\n(.+?)\n  -+"s
 const mo_energy_regex2 = r"(\d+) +(-?\d+\.\d+)"
 
