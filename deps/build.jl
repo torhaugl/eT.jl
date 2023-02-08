@@ -35,6 +35,8 @@ else
     orig_dir = pwd()
     cd(eT_dir)
 
+    run(`lscpu`)
+
     Conda.add(
         ["git", "tar", "unzip", "gcc", "gxx", "gfortran", "cmake", "ninja"]
     )

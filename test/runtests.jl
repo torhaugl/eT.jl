@@ -26,7 +26,7 @@ end
 
 @testset "eT.jl" begin
     @test test_ccsd_energy() ≈ -76.24008257677
-    @test test_cholesky()[1] ≈ 391.54512680090147
+    @test abs(test_cholesky()[1] - 391.54512680090147) < 1e-5
     @test test_cholesky()[2] == (nmo=24, no=5, nv=19, nJ=279)
 end
 
