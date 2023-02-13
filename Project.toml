@@ -8,6 +8,7 @@ Conda = "8f4d0f93-b110-5947-807f-2305c1781a2d"
 Molecules = "5de6a177-b489-40a9-b2f4-524242b9b679"
 
 [compat]
+Conda = "1"
 julia = "1.7"
 
 [extras]
