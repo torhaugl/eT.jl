@@ -1,17 +1,16 @@
-export InputFile, make_input_hf
+export InputFile, make_input_hf, add_fields!, run_input
 
 struct InputFile
     molecule::Molecule{Atom}
     basis::String
-
-    sections::Dict{String,Vector{Any}}
+    sections::Dict{String,Vector{String}}
 end
 
 function InputFile(molecule, basis)
     InputFile(
         molecule,
         basis,
-        Dict{String,Vector{Any}}()
+        Dict{String,Vector{String}}()
     )
 end
 
@@ -26,12 +25,7 @@ function Base.show(io::IO, inp::InputFile)
     for (section, fields) in inp.sections
         println(io, section)
         for field in fields
-            if field isa Pair
-                fieldname, value = field
-                println(io, "    ", fieldname, ": ", value)
-            else
-                println(io, "    ", field)
-            end
+            println(io, "    ", field)
         end
         println(io, "end ", section, "\n")
     end
@@ -61,4 +55,25 @@ function make_input_hf(molecule, basis, args...)
     add_fields!(inp, args...)
 
     inp
+end
+
+function run_input(inp::InputFile; kwargs...)
+    mktempdir() do scratch
+        inp_file = joinpath(scratch, "eT_jl.inp")
+
+        open(inp_file, "w") do io
+            print(io, inp)
+        end
+
+        try 
+            omp = get(kwargs, :omp, 1)
+            run(`$eT_launch $inp_file --omp $omp -ks --scratch $scratch`)
+        catch e
+            display(e)
+            ofile = joinpath(scratch, "eT.out")
+            println(read(`cat $(ofile)`, String))
+        end
+
+        OutputFile(scratch; kwargs...)
+    end
 end
