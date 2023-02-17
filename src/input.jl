@@ -17,9 +17,7 @@ end
 function Base.show(io::IO, inp::InputFile)
     println(io, "system")
     println(io, "    charge: ", inp.molecule.charge)
-    if inp.molecule.multiplicity != 1
-        println(io, "    multiplicity: ", inp.molecule.multiplicity)
-    end
+    println(io, "    multiplicity: ", inp.molecule.multiplicity)
     println(io, "end system\n")
 
     for (section, fields) in inp.sections
