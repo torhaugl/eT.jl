@@ -18,9 +18,19 @@ function Base.show(io::IO, inp::InputFile)
     println(io, "system")
     println(io, "    charge: ", inp.molecule.charge)
     println(io, "    multiplicity: ", inp.molecule.multiplicity)
+    for (section, fields) in inp.sections
+        if section == "system"
+            for field in fields
+                println(io, "    ", field)
+            end
+        end
+    end
     println(io, "end system\n")
 
     for (section, fields) in inp.sections
+        if section == "system"
+            continue
+        end
         println(io, section)
         for field in fields
             println(io, "    ", field)
@@ -65,7 +75,8 @@ function run_input(inp::InputFile; kwargs...)
 
         try 
             omp = get(kwargs, :omp, 1)
-            run(`$eT_launch $inp_file --omp $omp -ks --scratch $scratch`)
+            eT_launch_path = get(kwargs, :eT_launch, eT_launch)
+            run(`$eT_launch_path $inp_file --omp $omp -ks --scratch $scratch`)
         catch e
             display(e)
             ofile = joinpath(scratch, "eT.out")
