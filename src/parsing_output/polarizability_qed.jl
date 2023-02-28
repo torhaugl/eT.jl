@@ -4,7 +4,6 @@ export get_qed_polarizability
 
 function get_qed_polarizability(out::OutputFile)
     polarizability_vector = -parse.(Float64, [x.captures[1] for x in eachmatch(polarizability_qed_regex, out.contents["eT"])])
-    @show polarizability_vector
 
     # TODO Following line does not always work,
     # for instance when n_frequencies = 3 and n_polarization = 3
