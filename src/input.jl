@@ -1,5 +1,7 @@
 export InputFile, make_input_hf, add_fields!, run_input
 
+global oldeT = false
+
 struct InputFile
     molecule::Molecule{Atom}
     basis::String
@@ -15,6 +17,9 @@ function InputFile(molecule, basis)
 end
 
 function Base.show(io::IO, inp::InputFile)
+    if (~oldeT)
+       print(io, "- ")
+    end
     println(io, "system")
     println(io, "    charge: ", inp.molecule.charge)
     println(io, "    multiplicity: ", inp.molecule.multiplicity)
@@ -25,23 +30,35 @@ function Base.show(io::IO, inp::InputFile)
             end
         end
     end
-    println(io, "end system\n")
+    if (oldeT)
+        println(io, "end system\n")
+    end
 
     for (section, fields) in inp.sections
         if section == "system"
             continue
         end
+        if (~oldeT)
+            print(io, "- ")
+        end
         println(io, section)
         for field in fields
             println(io, "    ", field)
         end
-        println(io, "end ", section, "\n")
+	if (oldeT)
+            println(io, "end ", section, "\n")
+	end
     end
 
+    if (~oldeT)
+       print(io, "- ")
+    end
     println(io, "geometry")
     println(io, "basis: ", inp.basis)
     print(io, Molecules.get_xyz(inp.molecule))
-    println(io, "end geometry")
+    if (oldeT)
+        println(io, "end geometry")
+    end
 end
 
 function add_fields!(inp::InputFile, args...)
