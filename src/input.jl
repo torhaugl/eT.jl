@@ -75,7 +75,8 @@ function run_input(inp::InputFile; kwargs...)
 
         try 
             omp = get(kwargs, :omp, 1)
-            eT_launch_path = get(kwargs, :eT_launch, eT_launch)
+	    eT_launch_path = get(kwargs, :eT_launch, eT_launch)
+	    println("$eT_launch_path $inp_file --omp $omp -ks --scratch $scratch")
             run(`$eT_launch_path $inp_file --omp $omp -ks --scratch $scratch`)
         catch e
             display(e)
